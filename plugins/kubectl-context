@@ -1,13 +1,29 @@
 #!/bin/bash
 
-if [[ "$1" == "" ]]; then
+function version {
+	echo "Version: 1.0.0"
+}
+
+function info {
+	version
+	echo ""
 	echo "Set kubectl namespace context"
-	echo "Usage: kubectl context <namespace>"
+        echo "Usage: kubectl context <namespace>"
+}
+
+if [[ "$1" == "" ]]; then
+	info
+	echo ""
 	echo "Available contexts: $(kubectl config view -o jsonpath='{.contexts[*].name}')"
 	exit 1
-elif [[ "$1" == "version" ]]; then
-	echo "Version: 1.0.0"
+elif [[ "$1" == "info" ]]; then
+	info
 	exit 0
+elif [[ "$1" == "version" ]]; then
+	version
+	exit 0
+elif [[ "$1" == "list" ]]; then
+	echo "Available contexts: $(kubectl config view -o jsonpath='{.contexts[*].name}')"
 else
 	kubectl config use-context "$1"
 	echo "Context set to $1"

@@ -1,0 +1,38 @@
+#!/bin/bash
+
+function version {
+	echo "Version: 1.0.0"
+}
+
+function info {
+	version
+	echo ""
+	echo "Retrieve everything inside of a namespace. If no namespace is provided, it will default to the 'default' namespace"
+	echo "Usage: kubectl get all <namespace>"
+}
+
+function getall {
+	echo "Running with: $1"
+	local size=$(($(tput cols) / 2))
+	for i in $(kubectl api-resources --verbs=list --namespaced -o name | grep -v "events.events.k8s.io" | grep -v "events" | sort | uniq); do
+		local half_i=$(("${#i}" / 2))
+		local response=$(kubectl -n $1 get --ignore-not-found ${i})
+		if [ ! -z "$response" ]; then
+			printf "\n%$(($size - $half_i))s%s\n" "" "$i"
+			echo "$response"
+		fi
+	done
+}
+
+if [[ "$1" == "version" ]]; then
+	version
+	exit 0
+elif [[ "$1" == "info" ]]; then
+	info
+	exit 0
+elif [[ "$1" == "list" ]]; then
+	echo "Available namespaces: $(kubectl get namespace -o jsonpath='{.items[*].metadata.name}')"
+else
+	echo "${1:-default}"
+	getall "${1:-default}"
+fi
